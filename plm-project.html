@@ -298,6 +298,8 @@ table(training_trainset_predictor$classe)
 
 <h2>Cross Validation</h2>
 
+<p>The selection of predictor might not be suitable to outside test set, so apply cross validation to see the out of sample error.</p>
+
 <pre><code class="r">y2 &lt;- predict(modelFit, newdata = training_testset_predictor)
 table(training_testset_predictor$classe)
 </code></pre>

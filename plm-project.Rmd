@@ -55,6 +55,7 @@ table(y1==training_trainset_predictor$classe)[2]/sum(table(y1==training_trainset
 ```
 
 ## Cross Validation
+The selection of predictor might not be suitable to outside test set, so apply cross validation to see the out of sample error.
 ```{r}
 y2 <- predict(modelFit,newdata=training_testset_predictor)
 table(training_testset_predictor$classe)
