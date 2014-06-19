@@ -1,0 +1,78 @@
+Practical Machine Learning: Project Writeup
+========================================================
+
+## Load data
+```{r}
+set.seed(123)
+
+training <- read.csv("pml-training.csv",stringsAsFactors=FALSE)
+testing <- read.csv("pml-testing.csv",stringsAsFactors=FALSE)
+```
+
+## Preprocessing
+- divide data into 10 parts, 9 for training, 1 for cross validation
+```{r}
+library(caret)
+folds <- createFolds(y=training$classe,k=10,list=FALSE)
+training_trainset <- training[folds!=10,]
+training_testset <- training[folds==10,]
+```
+- due to PC memory issue, use 1% data instead
+```{r}
+inTrain <- createDataPartition(y=training_trainset$classe,p=0.01,list=FALSE)
+inTest <- createDataPartition(y=training_testset$classe,p=0.01,list=FALSE)
+```
+- take column 8,9,10,11 as predictor, classe as outcome
+```{r}
+training_trainset_predictor <- training_trainset[inTrain,c(8:11,160)]
+training_testset_predictor <- training_testset[inTest,c(8:11,160)]
+testing_predictor <- testing[,c(8:11,160)]
+```
+- transform classe into factor
+```{r}
+training_trainset_predictor <- transform(training_trainset_predictor,classe=as.factor(classe))
+training_testset_predictor <- transform(training_testset_predictor,classe=as.factor(classe))
+```
+
+## Training
+Apply "Tree Classification"
+```{r}
+set.seed(123)
+modelFit <- train(classe~.,method="rpart",data=training_trainset_predictor)
+print(modelFit$finalModel)
+```
+
+## Inside Test 
+```{r}
+y1 <- predict(modelFit,newdata=training_trainset_predictor)
+table(training_trainset_predictor$classe)
+table(y1)
+table(y1==training_trainset_predictor$classe)
+```
+Train Set Accuracy
+```{r}
+table(y1==training_trainset_predictor$classe)[2]/sum(table(y1==training_trainset_predictor$classe))
+```
+
+## Cross Validation
+```{r}
+y2 <- predict(modelFit,newdata=training_testset_predictor)
+table(training_testset_predictor$classe)
+table(y2)
+table(y2==training_testset_predictor$classe)
+```
+Cross Validation Set Accuracy
+```{r}
+table(y2==training_testset_predictor$classe)[2]/sum(table(y2==training_testset_predictor$classe))
+```
+
+## Outside Test
+```{r}
+y3 <- predict(modelFit,newdata=testing_predictor)
+table(y3)
+```
+Prediction Outcome
+```{r}
+y3
+```
+
