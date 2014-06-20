@@ -17,16 +17,35 @@ folds <- createFolds(y=training$classe,k=10,list=FALSE)
 training_trainset <- training[folds!=10,]
 training_testset <- training[folds==10,]
 ```
-- due to PC memory issue, use 1% data instead
+- experiment with 1%, 5%, 10%, 20%, 50%, 100% of data for training
 ```{r}
-inTrain <- createDataPartition(y=training_trainset$classe,p=0.01,list=FALSE)
-inTest <- createDataPartition(y=training_testset$classe,p=0.01,list=FALSE)
+#ratio = 0.01
+#ratio = 0.05
+#ratio = 0.1
+#ratio = 0.2
+ratio = 0.5
+#ratio = 1.0
+inTrain <- createDataPartition(y=training_trainset$classe,p=ratio,list=FALSE)
+inTest <- createDataPartition(y=training_testset$classe,p=ratio,list=FALSE)
 ```
-- take column 8,9,10,11 as predictor, classe as outcome
+- take non-NA numeric/integer column 8,9,10,11,... as predictor, classe as outcome
 ```{r}
-training_trainset_predictor <- training_trainset[inTrain,c(8:11,160)]
-training_testset_predictor <- training_testset[inTest,c(8:11,160)]
-testing_predictor <- testing[,c(8:11,160)]
+nIndex = 1
+j=1
+predictor = vector("numeric",length=0)
+for (i in training) {
+  if (nIndex>=7 && (class(i)=="numeric" || class(i)=="integer") && sum(is.na(i))==0) {
+    predictor[j] <- nIndex
+    j=j+1
+  }
+  nIndex = nIndex+1
+}
+
+#training_trainset_predictor <- training_trainset[inTrain,c(8:11,160)]
+#training_testset_predictor <- training_testset[inTest,c(8:11,160)]
+training_trainset_predictor <- training_trainset[inTrain,c(predictor,160)]
+training_testset_predictor <- training_testset[inTest,c(predictor,160)]
+testing_predictor <- testing[,c(predictor,160)]
 ```
 - transform classe into factor
 ```{r}
